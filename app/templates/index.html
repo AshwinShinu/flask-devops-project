@@ -150,6 +150,10 @@
 <script>
 let marksChart;
 
+// Adjusts Chart.js defaults for dark mode
+Chart.defaults.color = "#e0e0e0";
+Chart.defaults.borderColor = "#444";
+
 function loadStudents() {
     $.get("/api/students", function(data) {
         const tbody = $("#studentsTable tbody");
@@ -200,11 +204,24 @@ function loadStats() {
                 },
                 options: {
                     plugins: {
-                        legend: { labels: { color: "#e0e0e0" } }
+                        legend: {
+                            labels: { color: "#e0e0e0" }
+                        },
+                        tooltip: {
+                            titleColor: "#121212",
+                            bodyColor: "#121212",
+                            backgroundColor: "#00bcd4"
+                        }
                     },
                     scales: {
-                        x: { ticks: { color: "#e0e0e0" } },
-                        y: { ticks: { color: "#e0e0e0" } }
+                        x: {
+                            ticks: { color: "#e0e0e0" },
+                            grid: { color: "#333" }
+                        },
+                        y: {
+                            ticks: { color: "#e0e0e0" },
+                            grid: { color: "#333" }
+                        }
                     }
                 }
             });
@@ -271,7 +288,7 @@ function reloadAll() {
 
 $(document).ready(() => {
     reloadAll();
-    setInterval(loadStats, 10000); // auto-refresh stats
+    setInterval(loadStats, 10000); // auto-refresh stats every 10s
 });
 </script>
 </body>
