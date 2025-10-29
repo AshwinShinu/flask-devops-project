@@ -67,7 +67,6 @@
     tr:hover {
       background-color: #1f242c;
     }
-    /* Stats cards */
     .stat-card {
       background-color: #1c1f25;
       border-radius: 12px;
@@ -104,8 +103,45 @@
 <div class="container py-5">
   <h2 class="text-center mb-4">🎓 Student Management Dashboard</h2>
 
+  <!-- 🧾 Add Student Form -->
+  <div class="card shadow-sm mb-4 p-3">
+    <form id="studentForm" class="row g-3 align-items-end">
+      <div class="col-md-4">
+        <label class="form-label">Name</label>
+        <input type="text" class="form-control" id="name" placeholder="Enter name" required>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Roll</label>
+        <input type="text" class="form-control" id="roll" placeholder="Enter roll no" required>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Marks</label>
+        <input type="number" class="form-control" id="marks" placeholder="Marks" required>
+      </div>
+      <div class="col-md-2 d-grid">
+        <button type="submit" class="btn btn-primary">Add</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- 🧮 Student Table -->
+  <div class="card shadow-sm mb-5 p-3">
+    <table class="table table-dark table-hover text-center align-middle" id="studentsTable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Roll</th>
+          <th>Marks</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
   <!-- 📊 Analytics Dashboard -->
-  <div class="card shadow-sm p-4 mb-4">
+  <div class="card shadow-sm p-4">
     <h4 class="text-center mb-3">📈 Student Performance Overview</h4>
     <div class="row text-center mb-4">
       <div class="col-md-3 mb-3">
@@ -135,9 +171,15 @@
     </div>
 
     <div class="row">
-      <div class="col-md-6"><canvas id="marksChart" height="100"></canvas></div>
-      <div class="col-md-6"><canvas id="trendChart" height="100"></canvas></div>
-      <div class="col-md-12 mt-4"><canvas id="gradeChart" height="100"></canvas></div>
+      <div class="col-md-6 mb-4"><canvas id="marksChart" height="100"></canvas></div>
+      <div class="col-md-6 mb-4"><canvas id="trendChart" height="100"></canvas></div>
+    </div>
+
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <!-- 🥧 Smaller Pie Chart -->
+        <canvas id="gradeChart" height="60"></canvas>
+      </div>
     </div>
 
     <!-- 🏆 Top Performers -->
@@ -146,49 +188,10 @@
       <ul id="topPerformers" class="list-group list-group-flush bg-transparent text-light d-inline-block" style="max-width:400px; margin:auto;"></ul>
     </div>
   </div>
-
-  <!-- Add Student Form -->
-  <div class="card shadow-sm mb-4 p-3">
-    <form id="studentForm" class="row g-3 align-items-end">
-      <div class="col-md-4">
-        <label class="form-label">Name</label>
-        <input type="text" class="form-control" id="name" placeholder="Enter name" required>
-      </div>
-      <div class="col-md-3">
-        <label class="form-label">Roll</label>
-        <input type="text" class="form-control" id="roll" placeholder="Enter roll no" required>
-      </div>
-      <div class="col-md-3">
-        <label class="form-label">Marks</label>
-        <input type="number" class="form-control" id="marks" placeholder="Marks" required>
-      </div>
-      <div class="col-md-2 d-grid">
-        <button type="submit" class="btn btn-primary">Add</button>
-      </div>
-    </form>
-  </div>
-
-  <!-- Student Table -->
-  <div class="card shadow-sm p-3">
-    <table class="table table-dark table-hover text-center align-middle" id="studentsTable">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Name</th>
-          <th>Roll</th>
-          <th>Marks</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
 </div>
 
 <script>
 let marksChart, trendChart, gradeChart;
-
-// Bright chart defaults
 Chart.defaults.color = "#ffffff";
 Chart.defaults.borderColor = "#555";
 
@@ -220,14 +223,13 @@ function loadStats() {
     $("#highest").text(data.highest);
     $("#lowest").text(data.lowest);
 
-    // Dynamic color cues for average
     const avg = parseFloat(data.average);
     const avgElem = $("#average");
     if (avg >= 80) avgElem.css("color", "#4caf50");
     else if (avg >= 50) avgElem.css("color", "#ffeb3b");
     else avgElem.css("color", "#f44336");
 
-    // Bar chart
+    // Bar Chart
     const dist = data.distribution;
     const labels = Object.keys(dist);
     const values = Object.values(dist);
@@ -257,7 +259,7 @@ function loadStats() {
       });
     }
 
-    // Line chart
+    // Line Chart
     const avgTrend = data.trend || [];
     const trendLabels = avgTrend.map((_, i) => `T${i+1}`);
     const trendValues = avgTrend;
@@ -290,7 +292,7 @@ function loadStats() {
       });
     }
 
-    // Pie chart
+    // Pie Chart
     const gdist = data.grade_distribution || {};
     const ctx3 = document.getElementById("gradeChart").getContext("2d");
     if (gradeChart) {
@@ -311,7 +313,7 @@ function loadStats() {
       });
     }
 
-    // Top performers
+    // Top Performers
     const topList = $("#topPerformers");
     topList.empty();
     if (data.top_students) {
