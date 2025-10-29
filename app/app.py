@@ -15,7 +15,9 @@ def index():
     students = Student.query.all()
     return render_template("index.html", students=students)
 
-# API endpoints
+# -------------------------
+# 📘 CRUD API Endpoints
+# -------------------------
 @app.route("/api/students", methods=["GET"])
 def list_students():
     students = Student.query.all()
@@ -54,7 +56,7 @@ def delete_student(student_id):
     db.session.commit()
     return "", 204
 
-# simple form-based add
+# Simple form-based add (for manual testing)
 @app.route("/add", methods=["POST"])
 def add_form():
     name = request.form.get("name")
@@ -65,6 +67,9 @@ def add_form():
     db.session.commit()
     return redirect(url_for("index"))
 
+# -------------------------
+# 📊 Stats Endpoint
+# -------------------------
 @app.route("/api/stats", methods=["GET"])
 def get_stats():
     students = Student.query.all()
@@ -75,6 +80,7 @@ def get_stats():
             "highest": 0,
             "lowest": 0,
             "distribution": {"<50": 0, "50-74": 0, "75-89": 0, "90+": 0},
+            "grade_distribution": {"A": 0, "B": 0, "C": 0, "F": 0},
             "trend": [],
             "top_students": []
         })
@@ -84,6 +90,7 @@ def get_stats():
     highest = max(marks)
     lowest = min(marks)
 
+    # Bar chart distribution
     distribution = {
         "<50": len([m for m in marks if m < 50]),
         "50-74": len([m for m in marks if 50 <= m < 75]),
@@ -91,8 +98,15 @@ def get_stats():
         "90+": len([m for m in marks if m >= 90]),
     }
 
-    # 🔹 Generate simple “average marks trend” (demo data)
-    # You can replace this with DB logic if you store timestamps
+    # Grade distribution (for pie chart)
+    grade_distribution = {
+        "A": len([m for m in marks if m >= 85]),
+        "B": len([m for m in marks if 70 <= m < 85]),
+        "C": len([m for m in marks if 50 <= m < 70]),
+        "F": len([m for m in marks if m < 50]),
+    }
+
+    # Simple average trend (placeholder)
     trend = [
         round(avg - 5 if avg > 5 else avg, 2),
         round(avg - 2 if avg > 2 else avg, 2),
@@ -100,7 +114,7 @@ def get_stats():
         round(avg + 3, 2)
     ]
 
-    # 🔹 Top 3 performers
+    # Top 3 performers
     top_students = sorted(students, key=lambda s: float(s.marks), reverse=True)[:3]
     top_data = [{"name": s.name, "marks": float(s.marks)} for s in top_students]
 
@@ -110,6 +124,7 @@ def get_stats():
         "highest": highest,
         "lowest": lowest,
         "distribution": distribution,
+        "grade_distribution": grade_distribution,
         "trend": trend,
         "top_students": top_data
     })

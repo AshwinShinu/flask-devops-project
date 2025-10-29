@@ -83,6 +83,19 @@
       font-weight: bold;
       color: #00e5ff;
       text-shadow: 0 0 10px rgba(0,229,255,0.7);
+      transition: transform 0.2s ease;
+    }
+    .stat-card:hover .stat-value {
+      transform: scale(1.1);
+    }
+    label, h6, th {
+      color: #e6edf3 !important;
+    }
+    .table td {
+      color: #ffffff !important;
+    }
+    .table-hover tbody tr:hover {
+      background-color: rgba(0,188,212,0.15) !important;
     }
   </style>
 </head>
@@ -120,9 +133,17 @@
         </div>
       </div>
     </div>
+
     <div class="row">
       <div class="col-md-6"><canvas id="marksChart" height="100"></canvas></div>
       <div class="col-md-6"><canvas id="trendChart" height="100"></canvas></div>
+      <div class="col-md-12 mt-4"><canvas id="gradeChart" height="100"></canvas></div>
+    </div>
+
+    <!-- 🏆 Top Performers -->
+    <div class="mt-4 text-center">
+      <h5 style="color:#00bcd4;">🏆 Top 3 Performers</h5>
+      <ul id="topPerformers" class="list-group list-group-flush bg-transparent text-light d-inline-block" style="max-width:400px; margin:auto;"></ul>
     </div>
   </div>
 
@@ -165,9 +186,9 @@
 </div>
 
 <script>
-let marksChart, trendChart;
+let marksChart, trendChart, gradeChart;
 
-// Brighter chart defaults
+// Bright chart defaults
 Chart.defaults.color = "#ffffff";
 Chart.defaults.borderColor = "#555";
 
@@ -199,11 +220,17 @@ function loadStats() {
     $("#highest").text(data.highest);
     $("#lowest").text(data.lowest);
 
+    // Dynamic color cues for average
+    const avg = parseFloat(data.average);
+    const avgElem = $("#average");
+    if (avg >= 80) avgElem.css("color", "#4caf50");
+    else if (avg >= 50) avgElem.css("color", "#ffeb3b");
+    else avgElem.css("color", "#f44336");
+
+    // Bar chart
     const dist = data.distribution;
     const labels = Object.keys(dist);
     const values = Object.values(dist);
-
-    // Bar chart for marks distribution
     if (marksChart) {
       marksChart.data.labels = labels;
       marksChart.data.datasets[0].data = values;
@@ -221,9 +248,7 @@ function loadStats() {
           }]
         },
         options: {
-          plugins: {
-            legend: { labels: { color: "#fff" } }
-          },
+          plugins: { legend: { labels: { color: "#fff" } } },
           scales: {
             x: { ticks: { color: "#fff" }, grid: { color: "#333" } },
             y: { ticks: { color: "#fff" }, grid: { color: "#333" } }
@@ -232,11 +257,10 @@ function loadStats() {
       });
     }
 
-    // Line chart for average marks trend
+    // Line chart
     const avgTrend = data.trend || [];
     const trendLabels = avgTrend.map((_, i) => `T${i+1}`);
     const trendValues = avgTrend;
-
     if (trendChart) {
       trendChart.data.labels = trendLabels;
       trendChart.data.datasets[0].data = trendValues;
@@ -257,14 +281,44 @@ function loadStats() {
           }]
         },
         options: {
-          plugins: {
-            legend: { labels: { color: "#fff" } }
-          },
+          plugins: { legend: { labels: { color: "#fff" } } },
           scales: {
             x: { ticks: { color: "#fff" }, grid: { color: "#333" } },
             y: { ticks: { color: "#fff" }, grid: { color: "#333" } }
           }
         }
+      });
+    }
+
+    // Pie chart
+    const gdist = data.grade_distribution || {};
+    const ctx3 = document.getElementById("gradeChart").getContext("2d");
+    if (gradeChart) {
+      gradeChart.data.labels = Object.keys(gdist);
+      gradeChart.data.datasets[0].data = Object.values(gdist);
+      gradeChart.update();
+    } else {
+      gradeChart = new Chart(ctx3, {
+        type: "pie",
+        data: {
+          labels: Object.keys(gdist),
+          datasets: [{
+            data: Object.values(gdist),
+            backgroundColor: ["#4caf50", "#ffeb3b", "#f44336", "#2196f3"]
+          }]
+        },
+        options: { plugins: { legend: { labels: { color: "#fff" } } } }
+      });
+    }
+
+    // Top performers
+    const topList = $("#topPerformers");
+    topList.empty();
+    if (data.top_students) {
+      data.top_students.forEach((s, i) => {
+        topList.append(`<li class="list-group-item bg-transparent text-light border-0">
+          #${i+1} <strong>${s.name}</strong> — ${s.marks} marks
+        </li>`);
       });
     }
   });
