@@ -74,24 +74,46 @@ def get_stats():
             "average": 0,
             "highest": 0,
             "lowest": 0,
-            "distribution": {}
+            "distribution": {"<50": 0, "50-74": 0, "75-89": 0, "90+": 0},
+            "trend": [],
+            "top_students": []
         })
 
     marks = [float(s.marks) for s in students]
+    avg = round(mean(marks), 2)
+    highest = max(marks)
+    lowest = min(marks)
+
     distribution = {
-        "90+": len([m for m in marks if m >= 90]),
-        "75-89": len([m for m in marks if 75 <= m < 90]),
+        "<50": len([m for m in marks if m < 50]),
         "50-74": len([m for m in marks if 50 <= m < 75]),
-        "<50": len([m for m in marks if m < 50])
+        "75-89": len([m for m in marks if 75 <= m < 90]),
+        "90+": len([m for m in marks if m >= 90]),
     }
+
+    # 🔹 Generate simple “average marks trend” (demo data)
+    # You can replace this with DB logic if you store timestamps
+    trend = [
+        round(avg - 5 if avg > 5 else avg, 2),
+        round(avg - 2 if avg > 2 else avg, 2),
+        avg,
+        round(avg + 3, 2)
+    ]
+
+    # 🔹 Top 3 performers
+    top_students = sorted(students, key=lambda s: float(s.marks), reverse=True)[:3]
+    top_data = [{"name": s.name, "marks": float(s.marks)} for s in top_students]
 
     return jsonify({
         "count": len(students),
-        "average": round(mean(marks), 2),
-        "highest": max(marks),
-        "lowest": min(marks),
-        "distribution": distribution
+        "average": avg,
+        "highest": highest,
+        "lowest": lowest,
+        "distribution": distribution,
+        "trend": trend,
+        "top_students": top_data
     })
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
