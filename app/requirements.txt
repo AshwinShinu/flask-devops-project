@@ -3,3 +3,4 @@ Flask-SQLAlchemy>=3.0
 requests
 pytest
 gunicorn
+pytest
