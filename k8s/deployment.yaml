@@ -17,6 +17,7 @@ spec:
       containers:
       - name: flask-app
         image: ashwinacr123.azurecr.io/flaskapp:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 5000
         env:

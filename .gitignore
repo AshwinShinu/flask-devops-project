@@ -16,3 +16,5 @@ terraform/terraform.tfstate.backup
 .terraform/
 terraform.tfstate*
 .terraform.lock.hcl
+start.sh
+stop.sh
