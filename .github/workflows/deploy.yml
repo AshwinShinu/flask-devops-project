@@ -32,12 +32,8 @@ jobs:
 
     # --- Log in to Azure Container Registry ---
     - name: Log in to ACR
-      uses: docker/login-action@v3
-      with:
-        registry: ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io
-        username: ${{ secrets.AZURE_USERNAME }}
-        password: ${{ secrets.AZURE_PASSWORD }}
-      continue-on-error: true  # Fallback if using az login
+      run: |
+        az acr login --name $AZURE_CONTAINER_REGISTRY
 
     # --- Build and push Docker image with caching ---
     - name: Build and push Docker image
