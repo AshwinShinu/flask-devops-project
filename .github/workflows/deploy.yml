@@ -72,7 +72,7 @@ jobs:
         IMAGE=${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.run_number }}
         echo "Deploying $IMAGE ..."
         kubectl set image deployment/flask-app flask-app=$IMAGE
-        kubectl rollout status deployment/flask-app --timeout=120s || {
+        kubectl rollout status deployment/flask-app --timeout=300s || {
           echo "Rollout failed — rolling back..."
           kubectl rollout undo deployment/flask-app
           exit 1
