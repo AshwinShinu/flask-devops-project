@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, render_template, redirect, url_for
 from models import init_db, db, Student
 import os
+from statistics import mean
 
 app = Flask(__name__)
 DATABASE = os.getenv("DATABASE_URL", "sqlite:///database.db")
@@ -63,6 +64,34 @@ def add_form():
     db.session.add(s)
     db.session.commit()
     return redirect(url_for("index"))
+
+@app.route("/api/stats", methods=["GET"])
+def get_stats():
+    students = Student.query.all()
+    if not students:
+        return jsonify({
+            "count": 0,
+            "average": 0,
+            "highest": 0,
+            "lowest": 0,
+            "distribution": {}
+        })
+
+    marks = [float(s.marks) for s in students]
+    distribution = {
+        "90+": len([m for m in marks if m >= 90]),
+        "75-89": len([m for m in marks if 75 <= m < 90]),
+        "50-74": len([m for m in marks if 50 <= m < 75]),
+        "<50": len([m for m in marks if m < 50])
+    }
+
+    return jsonify({
+        "count": len(students),
+        "average": round(mean(marks), 2),
+        "highest": max(marks),
+        "lowest": min(marks),
+        "distribution": distribution
+    })
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
